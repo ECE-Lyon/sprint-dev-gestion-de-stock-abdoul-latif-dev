@@ -1,0 +1,57 @@
+<?php
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'restaurant_stock');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+
+define('SITE_NAME', 'Gestion des Stocks Restaurant');
+define('BASE_URL', 'http://localhost/tousmesprojet/sprintdev');
+
+define('PERMISSION_LECTURE', 0);     
+define('PERMISSION_STOCK', 1);       
+define('PERMISSION_SUPERVISEUR', 2);  
+define('PERMISSION_ADMIN', 3);        
+
+try {
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+
+function estConnecte() {
+    return isset($_SESSION['user_id']);
+}
+
+function aPermission($niveau_requis) {
+    return estConnecte() && $_SESSION['niveau_permission'] >= $niveau_requis;
+}
+
+function estSuperviseur() {
+    return aPermission(PERMISSION_SUPERVISEUR);
+}
+
+function peutModifierStock() {
+    return aPermission(PERMISSION_STOCK);
+}
+
+function verifierPermission($niveau_requis) {
+    if (!aPermission($niveau_requis)) {
+        $_SESSION['error'] = "Vous n'avez pas les permissions nécessaires pour accéder à cette page.";
+        header('Location: ' . BASE_URL . '/index.php');
+        exit;
+    }
+}
+?>
