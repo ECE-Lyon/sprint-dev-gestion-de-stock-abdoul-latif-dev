@@ -11,12 +11,18 @@ $erreur = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
-        $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_STRING);
-        $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_STRING);
+        $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_SPECIAL_CHARS);
+        $description = filter_input(INPUT_POST, 'description', FILTER_SANITIZE_SPECIAL_CHARS);
 
         switch ($_POST['action']) {
             case 'ajouter':
                 if ($nom) {
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE nom = ?");
+                    $stmt->execute([$nom]);
+                    if ($stmt->fetchColumn() > 0) {
+                        $erreur = "Cette catégorie existe déjà.";
+                        break;
+                    }
                     $stmt = $pdo->prepare("INSERT INTO categories (nom, description) VALUES (?, ?)");
                     if ($stmt->execute([$nom, $description])) {
                         $message = "Catégorie ajoutée avec succès";
@@ -59,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Récupérer toutes les catégories
 $categories = $pdo->query("SELECT c.*, COUNT(p.id) as nb_produits 
                           FROM categories c 
                           LEFT JOIN produits p ON c.id = p.categorie_id 

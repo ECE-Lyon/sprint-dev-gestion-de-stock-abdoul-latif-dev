@@ -39,9 +39,6 @@ require_once 'config.php';
                     <li class="nav-item">
                         <a class="nav-link" href="connexion.php">Connexion</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="inscription.php">Inscription</a>
-                    </li>
                     <?php endif; ?>
                 </ul>
             </div>

@@ -9,11 +9,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="stocks.php">Stocks</a>
                 </li>
-                <?php if (estSuperviseur()): ?>
-                <li class="nav-item">
-                    <a class="nav-link" href="historique.php">Historique</a>
-                </li>
-                <?php endif; ?>
                 <?php if (aPermission(3)): ?>
                 <li class="nav-item">
                     <a class="nav-link" href="admin/">Administration</a>
@@ -31,9 +26,6 @@
                 <?php else: ?>
                 <li class="nav-item">
                     <a class="nav-link" href="connexion.php">Connexion</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="inscription.php">Inscription</a>
                 </li>
                 <?php endif; ?>
             </ul>

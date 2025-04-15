@@ -26,10 +26,7 @@ try {
     die("Erreur de connexion : " . $e->getMessage());
 }
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
+session_start();
 
 function estConnecte() {
     return isset($_SESSION['user_id']);

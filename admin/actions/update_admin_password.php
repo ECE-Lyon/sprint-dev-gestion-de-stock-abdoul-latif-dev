@@ -1,5 +1,5 @@
 <?php
-require_once '../../config.php';
+require_once 'C:/wamp64/www/tousmesprojet/sprint-dev-gestion-de-stock-abdoul-latif-dev/config.php';;
 
 $password = 'Admin123!';
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);

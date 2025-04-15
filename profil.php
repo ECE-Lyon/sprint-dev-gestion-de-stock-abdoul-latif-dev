@@ -8,54 +8,72 @@ if (!estConnecte()) {
 
 $message = '';
 $erreur = '';
+$erreurs = array();
 
 $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $utilisateur = $stmt->fetch();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_STRING);
-    $prenom = filter_input(INPUT_POST, 'prenom', FILTER_SANITIZE_STRING);
+    $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_SPECIAL_CHARS);
+    $prenom = filter_input(INPUT_POST, 'prenom', FILTER_SANITIZE_SPECIAL_CHARS);
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $ancien_mdp = $_POST['ancien_mdp'] ?? '';
     $nouveau_mdp = $_POST['nouveau_mdp'] ?? '';
     $confirmer_mdp = $_POST['confirmer_mdp'] ?? '';
 
-    if ($nom && $prenom && $email) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM utilisateurs WHERE email = ? AND id != ?");
-        $stmt->execute([$email, $_SESSION['user_id']]);
-        $count = $stmt->fetchColumn();
+    if (strlen(trim($nom)) < 2 || strlen(trim($prenom)) < 2) {
+        $erreurs[] = "Nom et prénom doivent contenir au moins 2 caractères.";
+    }
 
-        if ($count == 0) {
-            if ($ancien_mdp && $nouveau_mdp && $confirmer_mdp) {
-                if (password_verify($ancien_mdp, $utilisateur['mot_de_passe'])) {
-                    if ($nouveau_mdp === $confirmer_mdp) {
-                        $hashed_password = password_hash($nouveau_mdp, PASSWORD_DEFAULT);
-                        $stmt = $pdo->prepare("UPDATE utilisateurs SET nom = ?, prenom = ?, email = ?, mot_de_passe = ? WHERE id = ?");
-                        if ($stmt->execute([$nom, $prenom, $email, $hashed_password, $_SESSION['user_id']])) {
-                            $message = "Profil mis à jour avec succès (avec nouveau mot de passe)";
-                            $_SESSION['nom'] = $nom;
-                            $_SESSION['prenom'] = $prenom;
+    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+    if (!$email) {
+        $erreurs[] = "Email invalide.";
+    }
+
+    if ($nouveau_mdp && strlen($nouveau_mdp) < 6) {
+        $erreurs[] = "Le mot de passe doit contenir au moins 6 caractères.";
+    }
+
+    if (!empty($erreurs)) {
+        $_SESSION['admin_error'] = implode("<br>", $erreurs);
+    } else {
+        if ($nom && $prenom && $email) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM utilisateurs WHERE email = ? AND id != ?");
+            $stmt->execute([$email, $_SESSION['user_id']]);
+            $count = $stmt->fetchColumn();
+
+            if ($count == 0) {
+                if ($ancien_mdp && $nouveau_mdp && $confirmer_mdp) {
+                    if (password_verify($ancien_mdp, $utilisateur['mot_de_passe'])) {
+                        if ($nouveau_mdp === $confirmer_mdp) {
+                            $hashed_password = password_hash($nouveau_mdp, PASSWORD_DEFAULT);
+                            $stmt = $pdo->prepare("UPDATE utilisateurs SET nom = ?, prenom = ?, email = ?, mot_de_passe = ? WHERE id = ?");
+                            if ($stmt->execute([$nom, $prenom, $email, $hashed_password, $_SESSION['user_id']])) {
+                                $message = "Profil mis à jour avec succès (avec nouveau mot de passe)";
+                                $_SESSION['nom'] = $nom;
+                                $_SESSION['prenom'] = $prenom;
+                            }
+                        } else {
+                            $erreur = "Les nouveaux mots de passe ne correspondent pas";
                         }
                     } else {
-                        $erreur = "Les nouveaux mots de passe ne correspondent pas";
+                        $erreur = "Ancien mot de passe incorrect";
                     }
                 } else {
-                    $erreur = "Ancien mot de passe incorrect";
+                    $stmt = $pdo->prepare("UPDATE utilisateurs SET nom = ?, prenom = ?, email = ? WHERE id = ?");
+                    if ($stmt->execute([$nom, $prenom, $email, $_SESSION['user_id']])) {
+                        $message = "Profil mis à jour avec succès";
+                        $_SESSION['nom'] = $nom;
+                        $_SESSION['prenom'] = $prenom;
+                    }
                 }
             } else {
-                $stmt = $pdo->prepare("UPDATE utilisateurs SET nom = ?, prenom = ?, email = ? WHERE id = ?");
-                if ($stmt->execute([$nom, $prenom, $email, $_SESSION['user_id']])) {
-                    $message = "Profil mis à jour avec succès";
-                    $_SESSION['nom'] = $nom;
-                    $_SESSION['prenom'] = $prenom;
-                }
+                $erreur = "Cet email est déjà utilisé par un autre utilisateur";
             }
         } else {
-            $erreur = "Cet email est déjà utilisé par un autre utilisateur";
+            $erreur = "Veuillez remplir tous les champs obligatoires";
         }
-    } else {
-        $erreur = "Veuillez remplir tous les champs obligatoires";
     }
 }
 ?>
@@ -83,6 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
                         <?php if ($erreur): ?>
                             <div class="alert alert-danger"><?php echo $erreur; ?></div>
+                        <?php endif; ?>
+                        <?php if (isset($_SESSION['admin_error'])): ?>
+                            <div class="alert alert-danger"><?php echo $_SESSION['admin_error']; unset($_SESSION['admin_error']); ?></div>
                         <?php endif; ?>
 
                         <form method="POST" action="">

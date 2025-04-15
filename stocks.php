@@ -23,7 +23,7 @@ $erreur = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'ajouter_produit') {
-        $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_STRING);
+        $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_SPECIAL_CHARS);
         $quantite = filter_input(INPUT_POST, 'quantite', FILTER_VALIDATE_INT);
         $categorie_id = filter_input(INPUT_POST, 'categorie_id', FILTER_VALIDATE_INT);
 
@@ -47,9 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             $stmt = $pdo->prepare("UPDATE produits SET quantite = ? WHERE id = ?");
             if ($stmt->execute([$nouvelle_quantite, $produit_id])) {
-                $stmt = $pdo->prepare("INSERT INTO historique_stock (produit_id, utilisateur_id, ancienne_quantite, nouvelle_quantite) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$produit_id, $_SESSION['user_id'], $ancienne_quantite, $nouvelle_quantite]);
-                
                 $message = "Quantité mise à jour";
             }
         }

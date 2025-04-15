@@ -1,8 +1,6 @@
--- Création de la base de données
 CREATE DATABASE IF NOT EXISTS restaurant_stock CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE restaurant_stock;
 
--- Table des utilisateurs
 CREATE TABLE IF NOT EXISTS utilisateurs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(50) NOT NULL,
@@ -14,7 +12,6 @@ CREATE TABLE IF NOT EXISTS utilisateurs (
     CHECK (niveau_permission >= 0 AND niveau_permission <= 3)
 );
 
--- Table des catégories
 CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(50) NOT NULL UNIQUE,
@@ -22,7 +19,6 @@ CREATE TABLE IF NOT EXISTS categories (
     date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table des produits
 CREATE TABLE IF NOT EXISTS produits (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
@@ -33,7 +29,6 @@ CREATE TABLE IF NOT EXISTS produits (
     CHECK (quantite >= 0)
 );
 
--- Insertion des catégories de base
 INSERT INTO categories (nom, description) VALUES
 ('Viande', 'Tous types de viandes'),
 ('Légumes', 'Légumes frais et conserves'),
@@ -42,7 +37,5 @@ INSERT INTO categories (nom, description) VALUES
 ('Épicerie', 'Produits secs et conserves'),
 ('Produits laitiers', 'Lait, fromage, yaourts');
 
--- Création d'un compte administrateur par défaut
--- Mot de passe : Admin123! (à changer après la première connexion)
 INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, niveau_permission) VALUES
 ('Admin', 'System', 'admin@restaurant.fr', '$2y$10$YourHashedPasswordHere', 3);

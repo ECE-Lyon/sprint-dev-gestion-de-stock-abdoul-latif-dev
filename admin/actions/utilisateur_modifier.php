@@ -8,8 +8,8 @@ if (!aPermission(3)) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = filter_input(INPUT_POST, 'user_id', FILTER_VALIDATE_INT);
-    $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_STRING);
-    $prenom = filter_input(INPUT_POST, 'prenom', FILTER_SANITIZE_STRING);
+    $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_SPECIAL_CHARS);
+    $prenom = filter_input(INPUT_POST, 'prenom', FILTER_SANITIZE_SPECIAL_CHARS);
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $niveau = filter_input(INPUT_POST, 'niveau_permission', FILTER_VALIDATE_INT);
     $password = $_POST['password'] ?? '';
