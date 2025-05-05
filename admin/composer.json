@@ -1,0 +1,8 @@
+{
+    "name": "gestion-destock",
+    "description": "Site de gestion de stock",
+    "require": {
+      "php": "8.1.31"
+    }
+  }
+  
