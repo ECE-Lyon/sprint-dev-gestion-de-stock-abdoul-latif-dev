@@ -1,5 +1,7 @@
 <?php
 require_once 'config.php';
+define('SITE_NAME', 'Ma super application');
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">

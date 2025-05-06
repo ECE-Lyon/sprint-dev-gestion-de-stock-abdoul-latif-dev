@@ -1,18 +1,30 @@
 <?php
-$host = getenv('DB_HOST');
-$port = getenv('DB_PORT');
-$dbname = getenv('DB_NAME');
-$user = getenv('DB_USER');
-$pass = getenv('DB_PASSWORD');
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'restaurant_stock');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+
+define('SITE_NAME', 'Gestion des Stocks Restaurant');
+define('BASE_URL', 'http://localhost/tousmesprojet/sprintdev');
+
+define('PERMISSION_LECTURE', 0);     
+define('PERMISSION_STOCK', 1);       
+define('PERMISSION_SUPERVISEUR', 2);  
+define('PERMISSION_ADMIN', 3);        
 
 try {
-    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Connexion réussie !";
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
 } catch (PDOException $e) {
-    echo "Erreur de connexion : " . $e->getMessage();
+    die("Erreur de connexion : " . $e->getMessage());
 }
-
 
 session_start();
 
