@@ -9,6 +9,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo BASE_URL; ?>/stocks.php">Stocks</a>
                 </li>
+                <?php if (aPermission(1)): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?php echo BASE_URL; ?>/historique.php">Historique</a>
+                </li>
+                <?php endif; ?>
                 <?php if (aPermission(3)): ?>
                 <!-- Vérifiez que ce lien est correct -->
                 <li class="nav-item">

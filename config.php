@@ -62,4 +62,39 @@ function verifierPermission($niveau_requis) {
         exit;
     }
 }
+
+/**
+ * Récupère la liste des produits dont la quantité est inférieure ou égale au seuil d'alerte
+ * @param int $seuil Seuil d'alerte (par défaut 5)
+ * @return array Liste des produits en alerte
+ */
+function getProduitsEnAlerte($seuil = 5) {
+    global $pdo;
+    try {
+        $query = $pdo->prepare("SELECT id, nom, quantite, seuil_alerte FROM produits WHERE quantite <= ? ORDER BY quantite ASC");
+        $query->execute([$seuil]);
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Erreur lors de la récupération des produits en alerte : " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Récupère le nombre de produits dont la quantité est inférieure ou égale au seuil d'alerte
+ * @param int $seuil Seuil d'alerte (par défaut 5)
+ * @return int Nombre de produits en alerte
+ */
+function getNombreProduitsEnAlerte($seuil = 5) {
+    global $pdo;
+    try {
+        $query = $pdo->prepare("SELECT COUNT(*) as total FROM produits WHERE quantite <= ?");
+        $query->execute([$seuil]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        return (int)$result['total'];
+    } catch (PDOException $e) {
+        error_log("Erreur lors du comptage des produits en alerte : " . $e->getMessage());
+        return 0;
+    }
+}
 ?>

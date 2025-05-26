@@ -12,5 +12,30 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css">
+    <style>
+        .alert-stock {
+            border-left: 5px solid #dc3545;
+            border-radius: 0;
+            margin-bottom: 0;
+        }
+        .alert-stock .bi {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
+    <?php if (estConnecte() && ($nbAlertes = getNombreProduitsEnAlerte()) > 0): ?>
+    <div class="alert alert-warning alert-dismissible fade show alert-stock" role="alert">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>
+                    <strong>Attention !</strong> Il y a <?php echo $nbAlertes; ?> produit(s) dont le stock est faible.
+                    <a href="stocks.php?alerte=1" class="alert-link">Voir les produits concernés</a>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    </div>
+    <?php endif; ?>

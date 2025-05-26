@@ -13,6 +13,7 @@ $variable = filter_input(INPUT_GET, 'quelquechose', FILTER_UNSAFE_RAW, FILTER_FL
 $recherche = filter_input(INPUT_GET, 'recherche', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 $tri = filter_input(INPUT_GET, 'tri', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH) ?: 'nom';
 $ordre = filter_input(INPUT_GET, 'ordre', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH) ?: 'asc';
+$alerte = isset($_GET['alerte']) && $_GET['alerte'] == 1; // Filtre pour les produits en alerte
 
 $produit = filter_input(INPUT_POST, 'produit', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
 $quantite = filter_input(INPUT_POST, 'quantite', FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
@@ -26,56 +27,117 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $nom = filter_input(INPUT_POST, 'nom', FILTER_SANITIZE_SPECIAL_CHARS);
         $quantite = filter_input(INPUT_POST, 'quantite', FILTER_VALIDATE_INT);
         $categorie_id = filter_input(INPUT_POST, 'categorie_id', FILTER_VALIDATE_INT);
+        $raison = filter_input(INPUT_POST, 'raison', FILTER_SANITIZE_SPECIAL_CHARS) ?: 'Ajout initial';
 
         if ($nom && $quantite !== false && $categorie_id) {
-            $stmt = $pdo->prepare("INSERT INTO produits (nom, quantite, categorie_id) VALUES (?, ?, ?)");
-            if ($stmt->execute([$nom, $quantite, $categorie_id])) {
-                $message = "Produit ajouté avec succès";
-            } else {
-                $erreur = "Erreur lors de l'ajout du produit";
+            try {
+                $pdo->beginTransaction();
+                
+                // Ajout du produit
+                $stmt = $pdo->prepare("INSERT INTO produits (nom, quantite, categorie_id) VALUES (?, ?, ?)");
+                if ($stmt->execute([$nom, $quantite, $categorie_id])) {
+                    $produit_id = $pdo->lastInsertId();
+                    
+                    // Enregistrement dans l'historique
+                    $stmt = $pdo->prepare("INSERT INTO historique_stock (produit_id, utilisateur_id, ancienne_quantite, nouvelle_quantite, raison) 
+                                         VALUES (?, ?, 0, ?, ?)");
+                    $stmt->execute([
+                        $produit_id,
+                        $_SESSION['user_id'],
+                        $quantite,
+                        $raison
+                    ]);
+                    
+                    $pdo->commit();
+                    $message = "Produit ajouté avec succès";
+                } else {
+                    throw new Exception("Erreur lors de l'ajout du produit");
+                }
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $erreur = "Erreur lors de l'ajout du produit: " . $e->getMessage();
             }
+        } else {
+            $erreur = "Veuillez remplir tous les champs correctement";
         }
     }
     elseif ($_POST['action'] === 'modifier_quantite' && aPermission(1)) {
         $produit_id = filter_input(INPUT_POST, 'produit_id', FILTER_VALIDATE_INT);
         $nouvelle_quantite = filter_input(INPUT_POST, 'nouvelle_quantite', FILTER_VALIDATE_INT);
+        $raison = filter_input(INPUT_POST, 'raison', FILTER_SANITIZE_SPECIAL_CHARS) ?: 'Modification manuelle';
 
         if ($produit_id && $nouvelle_quantite !== false) {
-            $stmt = $pdo->prepare("SELECT quantite FROM produits WHERE id = ?");
-            $stmt->execute([$produit_id]);
-            $ancienne_quantite = $stmt->fetchColumn();
+            try {
+                $pdo->beginTransaction();
+                
+                // Récupération de l'ancienne quantité
+                $stmt = $pdo->prepare("SELECT quantite FROM produits WHERE id = ? FOR UPDATE");
+                $stmt->execute([$produit_id]);
+                $ancienne_quantite = $stmt->fetchColumn();
 
-            $stmt = $pdo->prepare("UPDATE produits SET quantite = ? WHERE id = ?");
-            if ($stmt->execute([$nouvelle_quantite, $produit_id])) {
-                $message = "Quantité mise à jour";
+                if ($ancienne_quantite === false) {
+                    throw new Exception("Produit introuvable");
+                }
+
+                // Mise à jour de la quantité
+                $stmt = $pdo->prepare("UPDATE produits SET quantite = ? WHERE id = ?");
+                if ($stmt->execute([$nouvelle_quantite, $produit_id])) {
+                    // Enregistrement dans l'historique
+                    $stmt = $pdo->prepare("INSERT INTO historique_stock (produit_id, utilisateur_id, ancienne_quantite, nouvelle_quantite, raison) 
+                                         VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([
+                        $produit_id,
+                        $_SESSION['user_id'],
+                        $ancienne_quantite,
+                        $nouvelle_quantite,
+                        $raison
+                    ]);
+                    
+                    $pdo->commit();
+                    $message = "Quantité mise à jour avec succès";
+                } else {
+                    throw new Exception("Erreur lors de la mise à jour de la quantité");
+                }
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                $erreur = "Erreur lors de la mise à jour de la quantité: " . $e->getMessage();
             }
+        } else {
+            $erreur = "Données invalides pour la mise à jour";
         }
     }
 }
 
-// Récupération des données
+// Récupération des catégories
 $categories = $pdo->query("SELECT * FROM categories ORDER BY nom")->fetchAll();
 
-$sql = "
-    SELECT p.*, c.nom as categorie_nom 
-    FROM produits p 
-    JOIN categories c ON p.categorie_id = c.id 
-    WHERE 1=1
-";
+// Construction de la requête SQL
+$query = "SELECT p.*, c.nom as categorie_nom 
+          FROM produits p 
+          LEFT JOIN categories c ON p.categorie_id = c.id 
+          WHERE 1=1";
 
+$params = [];
+
+// Filtre de recherche
 if ($recherche) {
-    $sql .= " AND (p.nom LIKE :recherche OR c.nom LIKE :recherche)";
+    $query .= " AND (p.nom LIKE ? OR c.nom LIKE ?)";
+    $params[] = "%$recherche%";
+    $params[] = "%$recherche%";
 }
 
-$sql .= " ORDER BY " . ($tri == 'categorie_nom' ? 'c.nom' : 'p.'.$tri) . " $ordre";
-
-$stmt = $pdo->prepare($sql);
-
-if ($recherche) {
-    $stmt->bindValue(':recherche', "%$recherche%", PDO::PARAM_STR);
+// Filtre pour les produits en alerte
+if (isset($_GET['alerte']) && $_GET['alerte'] == 1) {
+    $query .= " AND p.quantite <= p.seuil_alerte";
+    $page_title = 'Produits en alerte de stock';
 }
 
-$stmt->execute();
+// Ajout du tri
+$query .= " ORDER BY " . ($tri == 'categorie_nom' ? 'c.nom' : 'p.'.$tri) . " $ordre";
+
+// Exécution de la requête
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $produits = $stmt->fetchAll();
 
 include 'includes/header.php';
@@ -226,6 +288,10 @@ include 'includes/navbar.php';
                         <div class="mb-3">
                             <label for="nouvelle_quantite" class="form-label">Nouvelle quantité</label>
                             <input type="number" class="form-control" id="nouvelle_quantite" name="nouvelle_quantite" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="raison" class="form-label">Raison de la modification</label>
+                            <input type="text" class="form-control" id="raison" name="raison" placeholder="Ex: Réapprovisionnement, Vente, etc." required>
                         </div>
                     </div>
                     <div class="modal-footer">
