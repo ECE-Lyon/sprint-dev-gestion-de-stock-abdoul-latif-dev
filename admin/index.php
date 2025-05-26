@@ -6,106 +6,104 @@ if (!aPermission(3)) {
     exit;
 }
 
+$page_title = 'Administration - Gestion Utilisateurs'; // Définir le titre de la page
+
 $utilisateurs = $pdo->query("SELECT * FROM utilisateurs ORDER BY nom, prenom")->fetchAll();
+
+include '../includes/header.php';
+include '../includes/navbar.php'; // Ajoutez cette ligne si elle manque
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - <?php echo SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="../index.php"><?php echo SITE_NAME; ?></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="index.php">Gestion Utilisateurs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="categories.php">Gestion Catégories</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../stocks.php">Retour aux stocks</a>
-                    </li>
-                </ul>
+
+<div class="main-container">
+    <!-- Menu de navigation d'administration -->
+    <div class="admin-nav mb-4 animated-element">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="index.php">Gestion des Utilisateurs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="categories.php">Gestion des Catégories</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="animated-card animate__animated animate__fadeIn">
+        <div class="card-header bg-primary text-white p-3">
+            <h4 class="mb-0 animated-title text-white">Gestion des Utilisateurs</h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 animated-element delay-1">
+                <p class="lead mb-0">Gérez les utilisateurs et leurs permissions</p>
+                <button type="button" class="btn btn-primary btn-animated" data-bs-toggle="modal" data-bs-target="#ajouterUtilisateur">
+                    <span><i class="bi bi-plus-circle"></i> Nouvel Utilisateur</span>
+                    <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </button>
             </div>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Gestion des Utilisateurs</h2>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterUtilisateur">
-                <i class="bi bi-plus-circle"></i> Nouvel Utilisateur
-            </button>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+            <div class="table-responsive animated-element delay-2">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th>Niveau</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($utilisateurs as $user): ?>
                             <tr>
-                                <th>Nom</th>
-                                <th>Prénom</th>
-                                <th>Email</th>
-                                <th>Niveau</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($utilisateurs as $user): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($user['nom']); ?></td>
-                                    <td><?php echo htmlspecialchars($user['prenom']); ?></td>
-                                    <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                    <td>
-                                        <span class="badge bg-<?php 
-                                            echo $user['niveau_permission'] == 3 ? 'danger' : 
-                                                ($user['niveau_permission'] == 2 ? 'warning' : 
-                                                ($user['niveau_permission'] == 1 ? 'info' : 'secondary')); 
-                                        ?>">
-                                            Niveau <?php echo $user['niveau_permission']; ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-primary me-1" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#modifierUtilisateur"
+                                <td><?php echo htmlspecialchars($user['nom']); ?></td>
+                                <td><?php echo htmlspecialchars($user['prenom']); ?></td>
+                                <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                <td>
+                                    <span class="badge bg-<?php 
+                                        echo $user['niveau_permission'] == 3 ? 'danger' : 
+                                            ($user['niveau_permission'] == 2 ? 'warning' : 
+                                            ($user['niveau_permission'] == 1 ? 'info' : 'secondary')); 
+                                    ?>">
+                                        Niveau <?php echo $user['niveau_permission']; ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary me-1 btn-animated" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modifierUtilisateur"
+                                            data-user-id="<?php echo $user['id']; ?>"
+                                            data-user-nom="<?php echo htmlspecialchars($user['nom']); ?>"
+                                            data-user-prenom="<?php echo htmlspecialchars($user['prenom']); ?>"
+                                            data-user-email="<?php echo htmlspecialchars($user['email']); ?>"
+                                            data-user-niveau="<?php echo $user['niveau_permission']; ?>">
+                                        <span><i class="bi bi-pencil"></i></span>
+                                        <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </button>
+                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                        <button type="button" class="btn btn-sm btn-danger btn-animated"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#supprimerUtilisateur"
                                                 data-user-id="<?php echo $user['id']; ?>"
-                                                data-user-nom="<?php echo htmlspecialchars($user['nom']); ?>"
-                                                data-user-prenom="<?php echo htmlspecialchars($user['prenom']); ?>"
-                                                data-user-email="<?php echo htmlspecialchars($user['email']); ?>"
-                                                data-user-niveau="<?php echo $user['niveau_permission']; ?>">
-                                            <i class="bi bi-pencil"></i>
+                                                data-user-nom="<?php echo htmlspecialchars($user['nom'] . ' ' . $user['prenom']); ?>">
+                                            <span><i class="bi bi-trash"></i></span>
+                                            <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                                                <span class="visually-hidden">Chargement...</span>
+                                            </div>
                                         </button>
-                                        <?php if ($user['id'] != $_SESSION['user_id']): ?>
-                                            <button type="button" class="btn btn-sm btn-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#supprimerUtilisateur"
-                                                    data-user-id="<?php echo $user['id']; ?>"
-                                                    data-user-nom="<?php echo htmlspecialchars($user['nom'] . ' ' . $user['prenom']); ?>">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
+    <!-- Modals (conservez le code existant des modals) -->
     <div class="modal fade" id="ajouterUtilisateur" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -243,5 +241,6 @@ $utilisateurs = $pdo->query("SELECT * FROM utilisateurs ORDER BY nom, prenom")->
             }
         });
     </script>
-</body>
-</html>
+</div>
+
+<?php include '../includes/footer.php'; ?>

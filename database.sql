@@ -1,5 +1,4 @@
-CREATE DATABASE IF NOT EXISTS restaurant_stock CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE restaurant_stock;
+
 
 CREATE TABLE IF NOT EXISTS utilisateurs (
     id INT AUTO_INCREMENT PRIMARY KEY,

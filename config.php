@@ -1,11 +1,22 @@
 <?php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'restaurant_stock');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Configuration locale
+if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '127.0.0.1') {
+    define('DB_HOST', 'localhost');
+    define('DB_NAME', 'gestion_stock_restaurant');
+    define('DB_USER', 'root');
+    define('DB_PASS', '');
+    define('BASE_URL', 'http://localhost/tousmesprojet/sprint-dev-gestion-de-stock-abdoul-latif-dev');
+}
+// Configuration en ligne
+else {
+    define('DB_HOST', 'sql105.infinityfree.com');
+    define('DB_NAME', 'if0_38848645_identifians');
+    define('DB_USER', 'if0_38848645');
+    define('DB_PASS', 'Rakiaaliosarki');
+    define('BASE_URL', 'http://gestion-stock.wuaze.com'); // URL corrigée sans backticks ni espaces
+}
 
 define('SITE_NAME', 'Gestion des Stocks Restaurant');
-define('BASE_URL', 'http://localhost/tousmesprojet/sprintdev');
 
 define('PERMISSION_LECTURE', 0);     
 define('PERMISSION_STOCK', 1);       

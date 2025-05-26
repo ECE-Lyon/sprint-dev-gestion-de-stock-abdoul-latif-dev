@@ -1,80 +1,97 @@
 <?php
 require_once 'config.php';
 
+// Démarrer la session si ce n'est pas déjà fait
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $erreur = '';
 $succes = '';
+$page_title = 'Connexion';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'] ?? '';
 
     if ($email && $password) {
-        $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE email = ?");
-        $stmt->execute([$email]);
-        $utilisateur = $stmt->fetch();
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE email = ?");
+            $stmt->execute([$email]);
+            $utilisateur = $stmt->fetch();
 
-        if ($utilisateur && password_verify($password, $utilisateur['mot_de_passe'])) {
-            $_SESSION['user_id'] = $utilisateur['id'];
-            $_SESSION['nom'] = $utilisateur['nom'];
-            $_SESSION['prenom'] = $utilisateur['prenom'];
-            $_SESSION['niveau_permission'] = $utilisateur['niveau_permission'];
-            
-            header('Location: index.php');
-            exit;
-        } else {
-            $erreur = 'Email ou mot de passe incorrect';
+            if (!$utilisateur) {
+                $erreur = 'Utilisateur non trouvé : ' . $email;
+            } elseif (!password_verify($password, $utilisateur['mot_de_passe'])) {
+                $erreur = 'Mot de passe incorrect pour : ' . $email;
+            } else {
+                // Connexion réussie
+                $_SESSION['user_id'] = $utilisateur['id'];
+                $_SESSION['nom'] = $utilisateur['nom'];
+                $_SESSION['prenom'] = $utilisateur['prenom'];
+                $_SESSION['niveau_permission'] = $utilisateur['niveau_permission'];
+                
+                // Redirection
+                header('Location: index.php');
+                exit;
+            }
+        } catch (PDOException $e) {
+            // Journaliser l'erreur et afficher un message générique
+            error_log('Erreur de connexion: ' . $e->getMessage());
+            $erreur = 'Une erreur est survenue lors de la connexion. Veuillez réessayer.';
         }
     } else {
         $erreur = 'Veuillez remplir tous les champs';
     }
 }
+
+include 'includes/header.php';
+include 'includes/navbar.php';
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - <?php echo SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <?php include 'includes/navbar.php'; ?>
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Connexion</h4>
-                    </div>
-                    <div class="card-body">
-                        <?php if ($erreur): ?>
-                            <div class="alert alert-danger"><?php echo $erreur; ?></div>
-                        <?php endif; ?>
-                        <?php if ($succes): ?>
-                            <div class="alert alert-success"><?php echo $succes; ?></div>
-                        <?php endif; ?>
+<div class="main-container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="animated-card animate__animated animate__fadeIn">
+                <div class="card-header bg-primary text-white p-3">
+                    <h4 class="mb-0 animated-title text-white">Connexion</h4>
+                </div>
+                <div class="card-body p-4">
+                    <?php if ($erreur): ?>
+                        <div class="alert alert-danger animate__animated animate__fadeIn"><?php echo $erreur; ?></div>
+                    <?php endif; ?>
+                    <?php if ($succes): ?>
+                        <div class="alert alert-success animate__animated animate__fadeIn"><?php echo $succes; ?></div>
+                    <?php endif; ?>
 
-                        <form method="POST" action="">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                    <form method="POST" action="">
+                        <div class="mb-3 animated-element delay-1">
+                            <label for="email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" required value="<?php echo htmlspecialchars($email ?? ''); ?>">
                             </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Mot de passe</label>
+                        </div>
+                        <div class="mb-4 animated-element delay-2">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
                                 <input type="password" class="form-control" id="password" name="password" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Se connecter</button>
-                        </form>
-                        <p class="mt-3">
-                            <!-- Pas encore de compte ? <a href="inscription.php">Inscrivez-vous ici</a> -->
-                        </p>
-                    </div>
+                        </div>
+                        <div class="animated-element delay-3">
+                            <button type="submit" class="btn btn-primary btn-animated">
+                                <span>Se connecter</span>
+                                <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php include 'includes/footer.php'; ?>

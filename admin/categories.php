@@ -6,6 +6,8 @@ if (!aPermission(3)) {
     exit;
 }
 
+$page_title = 'Administration - Gestion Catégories'; // Définir le titre de la page
+
 $message = '';
 $erreur = '';
 
@@ -70,100 +72,96 @@ $categories = $pdo->query("SELECT c.*, COUNT(p.id) as nb_produits
                           LEFT JOIN produits p ON c.id = p.categorie_id 
                           GROUP BY c.id 
                           ORDER BY c.nom")->fetchAll();
+
+include '../includes/header.php';
+include '../includes/navbar.php'; // Assurez-vous que cette ligne est présente
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Catégories - <?php echo SITE_NAME; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="../index.php"><?php echo SITE_NAME; ?></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php">Gestion Utilisateurs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="categories.php">Gestion Catégories</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../stocks.php">Retour aux stocks</a>
-                    </li>
-                </ul>
+
+<div class="main-container">
+    <!-- Menu de navigation d'administration -->
+    <div class="admin-nav mb-4 animated-element">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" href="index.php">Gestion des Utilisateurs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="categories.php">Gestion des Catégories</a>
+            </li>
+        </ul>
+    </div>
+
+    <?php if ($message): ?>
+        <div class="alert alert-success animate__animated animate__fadeIn"><?php echo $message; ?></div>
+    <?php endif; ?>
+    <?php if ($erreur): ?>
+        <div class="alert alert-danger animate__animated animate__fadeIn"><?php echo $erreur; ?></div>
+    <?php endif; ?>
+
+    <div class="animated-card animate__animated animate__fadeIn">
+        <div class="card-header bg-primary text-white p-3">
+            <h4 class="mb-0 animated-title text-white">Gestion des Catégories</h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 animated-element delay-1">
+                <p class="lead mb-0">Gérez les catégories de produits</p>
+                <button type="button" class="btn btn-primary btn-animated" data-bs-toggle="modal" data-bs-target="#ajouterCategorie">
+                    <span><i class="bi bi-plus-circle"></i> Nouvelle Catégorie</span>
+                    <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </button>
             </div>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        <?php if ($message): ?>
-            <div class="alert alert-success"><?php echo $message; ?></div>
-        <?php endif; ?>
-        <?php if ($erreur): ?>
-            <div class="alert alert-danger"><?php echo $erreur; ?></div>
-        <?php endif; ?>
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Gestion des Catégories</h2>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterCategorie">
-                <i class="bi bi-plus-circle"></i> Nouvelle Catégorie
-            </button>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+            <div class="table-responsive animated-element delay-2">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th>Produits</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($categories as $categorie): ?>
                             <tr>
-                                <th>Nom</th>
-                                <th>Description</th>
-                                <th>Nombre de produits</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($categories as $categorie): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($categorie['nom']); ?></td>
-                                    <td><?php echo htmlspecialchars($categorie['description'] ?? ''); ?></td>
-                                    <td><?php echo $categorie['nb_produits']; ?></td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-primary me-1"
+                                <td><?php echo htmlspecialchars($categorie['nom']); ?></td>
+                                <td><?php echo htmlspecialchars($categorie['description'] ?? ''); ?></td>
+                                <td><?php echo $categorie['nb_produits']; ?></td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary me-1 btn-animated" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modifierCategorie"
+                                            data-id="<?php echo $categorie['id']; ?>"
+                                            data-nom="<?php echo htmlspecialchars($categorie['nom']); ?>"
+                                            data-description="<?php echo htmlspecialchars($categorie['description'] ?? ''); ?>">
+                                        <span><i class="bi bi-pencil"></i></span>
+                                        <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </button>
+                                    <?php if ($categorie['nb_produits'] == 0): ?>
+                                        <button type="button" class="btn btn-sm btn-danger btn-animated"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#modifierCategorie"
-                                                data-categorie-id="<?php echo $categorie['id']; ?>"
-                                                data-categorie-nom="<?php echo htmlspecialchars($categorie['nom']); ?>"
-                                                data-categorie-description="<?php echo htmlspecialchars($categorie['description'] ?? ''); ?>">
-                                            <i class="bi bi-pencil"></i>
+                                                data-bs-target="#supprimerCategorie"
+                                                data-id="<?php echo $categorie['id']; ?>"
+                                                data-nom="<?php echo htmlspecialchars($categorie['nom']); ?>">
+                                            <span><i class="bi bi-trash"></i></span>
+                                            <div class="spinner-border spinner-border-sm loading-spinner" role="status">
+                                                <span class="visually-hidden">Chargement...</span>
+                                            </div>
                                         </button>
-                                        <?php if ($categorie['nb_produits'] == 0): ?>
-                                            <button type="button" class="btn btn-sm btn-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#supprimerCategorie"
-                                                    data-categorie-id="<?php echo $categorie['id']; ?>"
-                                                    data-categorie-nom="<?php echo htmlspecialchars($categorie['nom']); ?>">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
+    <!-- Modals (conservez le code existant des modals) -->
     <div class="modal fade" id="ajouterCategorie" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -202,15 +200,15 @@ $categories = $pdo->query("SELECT c.*, COUNT(p.id) as nb_produits
                 </div>
                 <form method="POST">
                     <input type="hidden" name="action" value="modifier">
-                    <input type="hidden" name="categorie_id" id="modifier_categorie_id">
+                    <input type="hidden" name="categorie_id" id="edit_categorie_id">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="modifier_nom" class="form-label">Nom</label>
-                            <input type="text" class="form-control" id="modifier_nom" name="nom" required>
+                            <label for="edit_nom" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="edit_nom" name="nom" required>
                         </div>
                         <div class="mb-3">
-                            <label for="modifier_description" class="form-label">Description</label>
-                            <textarea class="form-control" id="modifier_description" name="description" rows="3"></textarea>
+                            <label for="edit_description" class="form-label">Description</label>
+                            <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -231,9 +229,9 @@ $categories = $pdo->query("SELECT c.*, COUNT(p.id) as nb_produits
                 </div>
                 <form method="POST">
                     <input type="hidden" name="action" value="supprimer">
-                    <input type="hidden" name="categorie_id" id="supprimer_categorie_id">
+                    <input type="hidden" name="categorie_id" id="delete_categorie_id">
                     <div class="modal-body">
-                        <p>Êtes-vous sûr de vouloir supprimer la catégorie <strong id="supprimer_categorie_nom"></strong> ?</p>
+                        <p>Êtes-vous sûr de vouloir supprimer la catégorie <strong class="categorie-name"></strong> ?</p>
                         <p class="text-danger">Cette action est irréversible.</p>
                     </div>
                     <div class="modal-footer">
@@ -244,29 +242,6 @@ $categories = $pdo->query("SELECT c.*, COUNT(p.id) as nb_produits
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modifierModal = document.getElementById('modifierCategorie');
-            if (modifierModal) {
-                modifierModal.addEventListener('show.bs.modal', function(event) {
-                    const button = event.relatedTarget;
-                    document.getElementById('modifier_categorie_id').value = button.getAttribute('data-categorie-id');
-                    document.getElementById('modifier_nom').value = button.getAttribute('data-categorie-nom');
-                    document.getElementById('modifier_description').value = button.getAttribute('data-categorie-description');
-                });
-            }
-
-            const supprimerModal = document.getElementById('supprimerCategorie');
-            if (supprimerModal) {
-                supprimerModal.addEventListener('show.bs.modal', function(event) {
-                    const button = event.relatedTarget;
-                    document.getElementById('supprimer_categorie_id').value = button.getAttribute('data-categorie-id');
-                    document.getElementById('supprimer_categorie_nom').textContent = button.getAttribute('data-categorie-nom');
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+<?php include '../includes/footer.php'; ?>
