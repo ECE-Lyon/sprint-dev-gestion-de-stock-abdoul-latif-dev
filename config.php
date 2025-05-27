@@ -5,7 +5,11 @@ if ($_SERVER['SERVER_NAME'] == 'localhost' || $_SERVER['SERVER_NAME'] == '127.0.
     define('DB_NAME', 'gestion_stock_restaurant');
     define('DB_USER', 'root');
     define('DB_PASS', '');
+<<<<<<< HEAD
     define('BASE_URL', 'http://localhost/tousmesprojet/sprint-dev-gestion-de-stock-abdoul-latif-dev-main');
+=======
+    define('BASE_URL', 'http://localhost/tousmesprojet/sprint-dev-gestion-de-stock-abdoul-latif-dev');
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5
 }
 // Configuration en ligne
 else {
@@ -57,6 +61,7 @@ function peutModifierStock() {
 
 function verifierPermission($niveau_requis) {
     if (!aPermission($niveau_requis)) {
+<<<<<<< HEAD
         // Vérifier si nous ne sommes pas déjà en train de rediriger
         if (!headers_sent()) {
             $_SESSION['error'] = "Vous n'avez pas les permissions nécessaires pour accéder à cette page.";
@@ -68,6 +73,11 @@ function verifierPermission($niveau_requis) {
                 exit;
             }
         }
+=======
+        $_SESSION['error'] = "Vous n'avez pas les permissions nécessaires pour accéder à cette page.";
+        header('Location: ' . BASE_URL . '/index.php');
+        exit;
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5
     }
 }
 

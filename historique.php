@@ -101,12 +101,17 @@ include 'includes/navbar.php';
                         <input type="date" name="date_fin" class="form-control" value="<?php echo htmlspecialchars($date_fin ?? ''); ?>">
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
+<<<<<<< HEAD
                         <button type="submit" class="btn btn-primary me-2">
                             <i class="bi bi-funnel me-1"></i>Filtrer
                         </button>
                         <a href="historique.php" class="btn btn-outline-danger">
                             <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser
                         </a>
+=======
+                        <button type="submit" class="btn btn-primary me-2">Filtrer</button>
+                        <a href="historique.php" class="btn btn-outline-secondary">Réinitialiser</a>
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5
                     </div>
                 </div>
             </form>

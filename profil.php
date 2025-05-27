@@ -77,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+<<<<<<< HEAD
 <?php
 $page_title = 'Mon Profil';
 include 'includes/header.php';
@@ -208,3 +209,93 @@ include 'includes/navbar.php';
 </div>
 
 <?php include 'includes/footer.php'; ?>
+=======
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - <?php echo SITE_NAME; ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <?php include 'includes/navbar.php'; ?>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Mon Profil</h4>
+                    </div>
+                    <div class="card-body">
+                        <?php if ($message): ?>
+                            <div class="alert alert-success"><?php echo $message; ?></div>
+                        <?php endif; ?>
+                        <?php if ($erreur): ?>
+                            <div class="alert alert-danger"><?php echo $erreur; ?></div>
+                        <?php endif; ?>
+                        <?php if (isset($_SESSION['admin_error'])): ?>
+                            <div class="alert alert-danger"><?php echo $_SESSION['admin_error']; unset($_SESSION['admin_error']); ?></div>
+                        <?php endif; ?>
+
+                        <form method="POST" action="">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="nom" class="form-label">Nom</label>
+                                    <input type="text" class="form-control" id="nom" name="nom" 
+                                           value="<?php echo htmlspecialchars($utilisateur['nom']); ?>" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="prenom" class="form-label">Prénom</label>
+                                    <input type="text" class="form-control" id="prenom" name="prenom" 
+                                           value="<?php echo htmlspecialchars($utilisateur['prenom']); ?>" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="<?php echo htmlspecialchars($utilisateur['email']); ?>" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="niveau_permission" class="form-label">Niveau de permission</label>
+                                <input type="text" class="form-control" id="niveau_permission" 
+                                       value="<?php echo $utilisateur['niveau_permission']; ?>" readonly>
+                            </div>
+
+                            <hr>
+                            <h5>Changer le mot de passe</h5>
+                            <p class="text-muted small">Laissez vide si vous ne souhaitez pas changer de mot de passe</p>
+
+                            <div class="mb-3">
+                                <label for="ancien_mdp" class="form-label">Ancien mot de passe</label>
+                                <input type="password" class="form-control" id="ancien_mdp" name="ancien_mdp">
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="nouveau_mdp" class="form-label">Nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="nouveau_mdp" name="nouveau_mdp">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="confirmer_mdp" class="form-label">Confirmer le nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="confirmer_mdp" name="confirmer_mdp">
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Mettre à jour le profil</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5

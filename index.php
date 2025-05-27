@@ -66,7 +66,10 @@ include 'includes/navbar.php';
                 </a>
             </div>
         </div>
+<<<<<<< HEAD
         </div>
+=======
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5
     </div>
 </div>
 

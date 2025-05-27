@@ -24,4 +24,22 @@
         }
     </style>
 </head>
+<<<<<<< HEAD
 <body>
+=======
+<body>
+    <?php if (estConnecte() && ($nbAlertes = getNombreProduitsEnAlerte()) > 0): ?>
+    <div class="alert alert-warning alert-dismissible fade show alert-stock" role="alert">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>
+                    <strong>Attention !</strong> Il y a <?php echo $nbAlertes; ?> produit(s) dont le stock est faible.
+                    <a href="stocks.php?alerte=1" class="alert-link">Voir les produits concernés</a>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    </div>
+    <?php endif; ?>
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5

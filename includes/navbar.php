@@ -11,6 +11,7 @@
                 </li>
                 <?php if (aPermission(1)): ?>
                 <li class="nav-item">
+<<<<<<< HEAD
                     <a class="nav-link" href="<?php echo BASE_URL; ?>/historique.php">
                         <i class="bi bi-clock-history me-1"></i>Historique
                     </a>
@@ -29,6 +30,9 @@
                             </span>
                         <?php endif; ?>
                     </a>
+=======
+                    <a class="nav-link" href="<?php echo BASE_URL; ?>/historique.php">Historique</a>
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5
                 </li>
                 <?php endif; ?>
                 <?php if (aPermission(3)): ?>

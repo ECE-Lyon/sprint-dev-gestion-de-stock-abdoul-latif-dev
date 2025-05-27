@@ -218,7 +218,11 @@
                     
                     <div class="mt-4 animated-element delay-5">
                         <button id="enterBtn" class="btn btn-primary btn-enter">
+<<<<<<< HEAD
                             <span>Se connecter</span>
+=======
+                            <span>Accéder au système</span>
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5
                             <div class="spinner-border spinner-border-sm loading-spinner" role="status">
                                 <span class="visually-hidden">Chargement...</span>
                             </div>
@@ -252,8 +256,16 @@
                 $btnText.text('Chargement...');
                 $spinner.show();
                 
+<<<<<<< HEAD
                 // Rediriger directement vers la page de connexion
                 window.location.href = 'connexion.php';
+=======
+                // Simuler une requête Ajax (vous pouvez remplacer par une vraie requête)
+                setTimeout(function() {
+                    // Rediriger vers la page de connexion
+                    window.location.href = 'connexion.php';
+                }, 1000);
+>>>>>>> ceea169c776271af8ae07673547d20b5db9b81c5
             });
         });
     </script>
